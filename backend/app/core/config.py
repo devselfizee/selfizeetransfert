@@ -1,0 +1,39 @@
+import secrets
+from typing import List
+
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables."""
+
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@db:5432/selfizee_transfer"
+    REDIS_URL: str = "redis://redis:6379/0"
+    CELERY_BROKER_URL: str = "redis://redis:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://redis:6379/2"
+    SECRET_KEY: str = secrets.token_urlsafe(64)
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
+
+    STORAGE_PATH: str = "/storage/transfers"
+    MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024 * 1024  # 10 GB in bytes
+
+    SMTP_HOST: str = "localhost"
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = "noreply@selfizee.local"
+
+    BASE_URL: str = "https://transfer.selfizee.local"
+
+    BLOCKED_EXTENSIONS: List[str] = [".exe", ".bat", ".cmd", ".sh", ".ps1", ".vbs"]
+    CORS_ORIGINS: List[str] = ["http://localhost:3000", "https://transfer.selfizee.local"]
+
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True,
+    }
+
+
+settings = Settings()

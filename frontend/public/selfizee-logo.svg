@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
+  <rect x="0" y="8" width="34" height="34" rx="8" fill="#6C3FC5"/>
+  <path d="M10 28L15 23L20 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15 23V35" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M24 20L27 17L30 20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M27 17V26" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <text x="42" y="33" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="22" fill="#1a1a2e">selfizee</text>
+  <text x="152" y="33" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="22" fill="#6C3FC5">transfer</text>
+</svg>

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker --version)",
+      "Bash(docker compose:*)",
+      "Bash(/Applications/Docker.app/Contents/Resources/bin/docker --version)",
+      "Bash(export PATH=\"/Applications/Docker.app/Contents/Resources/bin:$PATH\")",
+      "Bash(curl -s --max-time 5 https://hub.docker.com)",
+      "Bash(sudo lsof:*)",
+      "Bash(openssl req:*)",
+      "Bash(curl -s http://localhost:8080)",
+      "Bash(curl -sk https://localhost:8443)",
+      "Bash(docker exec:*)",
+      "Bash(curl -sk https://localhost:8443/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"admin@selfizee.fr\"\",\"\"password\"\":\"\"Admin123!\"\"}')",
+      "Bash(curl -sk https://localhost:8443/api/auth/login -H 'Content-Type: application/json' --data-raw '{\"\"email\"\":\"\"admin@selfizee.fr\"\",\"\"password\"\":\"\"Admin123!\"\"}')",
+      "Bash(printf '{\"\"\"\"email\"\"\"\":\"\"\"\"admin@selfizee.fr\"\"\"\",\"\"\"\"password\"\"\"\":\"\"\"\"Admin123!\"\"\"\"}')",
+      "Bash(curl -sk https://localhost:8443/api/auth/login -H 'Content-Type: application/json' -d @-)",
+      "Bash(python3 -c \":*)"
+    ]
+  }
+}

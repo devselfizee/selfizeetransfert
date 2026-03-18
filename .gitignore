@@ -1,0 +1,58 @@
+# Dépendances
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnement
+.env
+.env.local
+.env.production
+
+# Stockage des transferts
+storage/transfers/*
+!storage/transfers/.gitkeep
+
+# Certificats SSL
+nginx/ssl/*
+!nginx/ssl/.gitkeep
+
+# Next.js
+.next/
+out/
+
+# Données PostgreSQL
+postgres_data/
+
+# Sauvegardes
+backups/*
+!backups/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Byte-compiled
+*.py[cod]
+*$py.class
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+.venv/
+env/
