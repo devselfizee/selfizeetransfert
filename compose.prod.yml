@@ -32,6 +32,8 @@ services:
     volumes:
       - storage_data:/storage
     depends_on:
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -46,8 +48,27 @@ services:
     volumes:
       - storage_data:/storage
     depends_on:
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - selfizee-net
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: selfizee_transfer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - selfizee-net
 
@@ -64,6 +85,7 @@ services:
 
 volumes:
   storage_data:
+  postgres_data:
 
 networks:
   selfizee-net:
