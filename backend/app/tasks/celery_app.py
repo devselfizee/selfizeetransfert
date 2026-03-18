@@ -7,7 +7,7 @@ celery_app = Celery(
     "selfizee_transfer",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
-    include=["app.tasks.cleanup"],
+    include=["app.tasks.cleanup", "app.tasks.expiry_notification"],
 )
 
 celery_app.conf.update(
@@ -26,5 +26,9 @@ celery_app.conf.beat_schedule = {
     "cleanup-expired-transfers": {
         "task": "app.tasks.cleanup.cleanup_expired_transfers",
         "schedule": crontab(minute="*/10"),
+    },
+    "notify-expiring-transfers": {
+        "task": "app.tasks.expiry_notification.notify_expiring_transfers",
+        "schedule": crontab(hour="*/1", minute="0"),
     },
 }

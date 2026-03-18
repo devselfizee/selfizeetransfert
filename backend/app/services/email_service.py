@@ -145,3 +145,146 @@ async def send_transfer_email(
             recipient_email,
             str(exc),
         )
+
+
+def _build_expiry_notification_html(
+    sender_name: str,
+    download_url: str,
+    expires_at: datetime,
+    is_sender: bool,
+    transfer_recipient_email: str | None,
+) -> str:
+    """Build an HTML email for expiry warning notification."""
+    expiry_str = _format_date_fr(expires_at)
+
+    if is_sender:
+        title = "Votre transfert expire bientôt"
+        intro = f"Votre transfert envoyé à <strong style=\"color: #6C3FC5;\">{transfer_recipient_email}</strong> n'a pas encore été téléchargé et expire le <strong>{expiry_str}</strong>."
+        cta_text = "Voir le transfert"
+    else:
+        title = "Un transfert va bientôt expirer"
+        intro = f"<strong style=\"color: #6C3FC5;\">{sender_name}</strong> vous a envoyé des fichiers que vous n'avez pas encore téléchargés. Ce lien expire le <strong>{expiry_str}</strong>."
+        cta_text = "Télécharger les fichiers"
+
+    return f"""
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f7;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f7; padding: 40px 0;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%); padding: 32px 40px; text-align: center;">
+                                <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Selfizee Transfer</h1>
+                            </td>
+                        </tr>
+                        <!-- Body -->
+                        <tr>
+                            <td style="padding: 40px;">
+                                <h2 style="margin: 0 0 16px 0; color: #1a1a2e; font-size: 22px; font-weight: 600;">
+                                    {title}
+                                </h2>
+                                <p style="margin: 0 0 8px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                                    {intro}
+                                </p>
+                                <div style="background-color: #fef3e2; border-left: 4px solid #e67e22; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                                    <p style="margin: 0; color: #333; font-size: 14px;">
+                                        Aucun téléchargement n'a été effectué pour le moment.
+                                    </p>
+                                </div>
+                                <div style="text-align: center; margin: 32px 0;">
+                                    <a href="{download_url}" style="display: inline-block; background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.3px;">
+                                        {cta_text}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background-color: #fdf8f3; padding: 24px 40px; text-align: center; border-top: 1px solid #f5e6d3;">
+                                <p style="margin: 0; color: #999; font-size: 12px;">
+                                    Propulsé par <strong style="color: #6C3FC5;">Selfizee Transfer</strong><br>
+                                    Le partage de fichiers sécurisé, simplifié.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    """
+
+
+async def send_expiry_notification_email(
+    recipient_email: str,
+    recipient_name: str | None,
+    sender_name: str,
+    download_url: str,
+    expires_at: datetime,
+    is_sender: bool,
+    transfer_recipient_email: str | None,
+) -> None:
+    """
+    Send an expiry warning email to the transfer creator or recipient.
+    """
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["From"] = settings.SMTP_FROM
+        msg["To"] = recipient_email
+
+        if is_sender:
+            msg["Subject"] = "Votre transfert Selfizee expire bientôt sans téléchargement"
+        else:
+            msg["Subject"] = f"{sender_name} vous a envoyé des fichiers - expiration imminente"
+
+        expiry_str = _format_date_fr(expires_at)
+
+        if is_sender:
+            plain_text = (
+                f"Votre transfert envoyé à {transfer_recipient_email} n'a pas encore été téléchargé.\n\n"
+                f"Il expire le {expiry_str}.\n\n"
+                f"Lien : {download_url}\n"
+            )
+        else:
+            plain_text = (
+                f"{sender_name} vous a envoyé des fichiers que vous n'avez pas encore téléchargés.\n\n"
+                f"Ce lien expire le {expiry_str}.\n\n"
+                f"Téléchargez-les ici : {download_url}\n"
+            )
+
+        html_body = _build_expiry_notification_html(
+            sender_name=sender_name,
+            download_url=download_url,
+            expires_at=expires_at,
+            is_sender=is_sender,
+            transfer_recipient_email=transfer_recipient_email,
+        )
+
+        msg.attach(MIMEText(plain_text, "plain"))
+        msg.attach(MIMEText(html_body, "html"))
+
+        await aiosmtplib.send(
+            msg,
+            hostname=settings.SMTP_HOST,
+            port=settings.SMTP_PORT,
+            username=settings.SMTP_USER or None,
+            password=settings.SMTP_PASSWORD or None,
+            start_tls=True if settings.SMTP_PORT == 587 else False,
+        )
+
+        logger.info("Expiry notification email sent to %s", recipient_email)
+
+    except Exception as exc:
+        logger.error(
+            "Failed to send expiry notification email to %s: %s",
+            recipient_email,
+            str(exc),
+        )
