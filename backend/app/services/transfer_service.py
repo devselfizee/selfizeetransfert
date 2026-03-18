@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import uuid
@@ -106,14 +107,16 @@ async def create_transfer(
         # Refresh to load relationships
         await db.refresh(transfer)
 
-        # Send notification email (non-blocking -- errors are logged, not raised)
+        # Send notification email in background (fire-and-forget, never blocks the response)
         download_url = f"{settings.BASE_URL}/download/{token}"
-        await send_transfer_email(
-            recipient_email=recipient_email,
-            sender_name=user.full_name,
-            message=message,
-            download_url=download_url,
-            expires_at=transfer.expires_at,
+        asyncio.create_task(
+            send_transfer_email(
+                recipient_email=recipient_email,
+                sender_name=user.full_name,
+                message=message,
+                download_url=download_url,
+                expires_at=transfer.expires_at,
+            )
         )
 
         logger.info(

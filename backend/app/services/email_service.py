@@ -129,11 +129,16 @@ async def send_transfer_email(
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_body, "html"))
 
+        if not settings.SMTP_HOST:
+            logger.warning("SMTP_HOST not configured, skipping email to %s", recipient_email)
+            return
+
         smtp_kwargs = {
             "hostname": settings.SMTP_HOST,
             "port": settings.SMTP_PORT,
             "username": settings.SMTP_USER or None,
             "password": settings.SMTP_PASSWORD or None,
+            "timeout": 15,
         }
         if settings.SMTP_PORT == 465:
             smtp_kwargs["use_tls"] = True
@@ -277,11 +282,16 @@ async def send_expiry_notification_email(
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_body, "html"))
 
+        if not settings.SMTP_HOST:
+            logger.warning("SMTP_HOST not configured, skipping expiry email to %s", recipient_email)
+            return
+
         smtp_kwargs = {
             "hostname": settings.SMTP_HOST,
             "port": settings.SMTP_PORT,
             "username": settings.SMTP_USER or None,
             "password": settings.SMTP_PASSWORD or None,
+            "timeout": 15,
         }
         if settings.SMTP_PORT == 465:
             smtp_kwargs["use_tls"] = True

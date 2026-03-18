@@ -10,7 +10,7 @@ import {
   ArrowLeftIcon,
 } from '@heroicons/react/24/outline';
 import AuthGuard from '@/components/AuthGuard';
-import Navbar from '@/components/Navbar';
+import FederatedLayout from '@/components/FederatedLayout';
 import Button from '@/components/Button';
 import { Transfer } from '@/lib/types';
 import { getTransfer } from '@/lib/api';
@@ -50,8 +50,7 @@ export default function TransferDetailPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
+      <FederatedLayout>
         <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {isLoading ? (
             <div className="flex justify-center py-16">
@@ -156,7 +155,7 @@ export default function TransferDetailPage() {
             </div>
           ) : null}
         </main>
-      </div>
+      </FederatedLayout>
     </AuthGuard>
   );
 }

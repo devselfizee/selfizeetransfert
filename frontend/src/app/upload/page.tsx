@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
-import Navbar from '@/components/Navbar';
+import FederatedLayout from '@/components/FederatedLayout';
 import FileDropzone from '@/components/FileDropzone';
 import TransferForm from '@/components/TransferForm';
 import UploadProgress from '@/components/UploadProgress';
@@ -48,8 +48,7 @@ export default function UploadPage() {
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
+      <FederatedLayout>
         <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Nouveau transfert</h1>
@@ -90,7 +89,7 @@ export default function UploadPage() {
             </div>
           )}
         </main>
-      </div>
+      </FederatedLayout>
     </AuthGuard>
   );
 }
