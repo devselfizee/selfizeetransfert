@@ -27,10 +27,17 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      if (!window.location.pathname.startsWith('/download')) {
-        // Will be handled by Keycloak token refresh in useAuth
+  async (error) => {
+    // On 401, try to get a fresh token before failing
+    if (error.response?.status === 401 && typeof window !== 'undefined' && getToken) {
+      const originalRequest = error.config;
+      if (!originalRequest._retry) {
+        originalRequest._retry = true;
+        const token = getToken();
+        if (token) {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }
       }
     }
     return Promise.reject(error);

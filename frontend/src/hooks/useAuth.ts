@@ -48,18 +48,36 @@ export function useAuth() {
         const me = await api.getMe(kc.token);
         setAuth(me, kc.token);
 
-        // Set up token refresh
+        // Set up token refresh - refresh every 10s, update token getter
         setInterval(async () => {
           try {
-            const refreshed = await kc.updateToken(30);
+            const refreshed = await kc.updateToken(60);
             if (refreshed && kc.token) {
               setToken(kc.token);
+              setTokenGetter(() => kc.token);
             }
           } catch {
-            clearAuth();
-            kc.login();
+            // Only redirect to login if no upload is in progress
+            const uploading = document.querySelector('[data-uploading="true"]');
+            if (!uploading) {
+              clearAuth();
+              kc.login();
+            }
           }
-        }, 30000);
+        }, 10000);
+
+        // Also refresh on token expiry event
+        kc.onTokenExpired = async () => {
+          try {
+            await kc.updateToken(60);
+            if (kc.token) {
+              setToken(kc.token);
+              setTokenGetter(() => kc.token);
+            }
+          } catch {
+            // Silent fail during upload
+          }
+        };
       }
     } catch (error) {
       console.error('Keycloak init failed:', error);

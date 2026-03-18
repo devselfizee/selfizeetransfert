@@ -29,7 +29,7 @@ export default function UploadProgress({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm" data-uploading="true">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-medium text-gray-700">Envoi en cours...</h3>
         <span className="text-sm font-semibold text-primary">{percent}%</span>
