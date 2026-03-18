@@ -30,7 +30,7 @@ def _build_transfer_email_html(
     message_block = ""
     if message:
         message_block = f"""
-        <div style="background-color: #f5f0ff; border-left: 4px solid #6C3FC5; padding: 16px; margin: 24px 0; border-radius: 4px;">
+        <div style="background-color: #eef8ff; border-left: 4px solid #0693e3; padding: 16px; margin: 24px 0; border-radius: 4px;">
             <p style="margin: 0; color: #333; font-style: italic;">&laquo; {message} &raquo;</p>
         </div>
         """
@@ -49,7 +49,7 @@ def _build_transfer_email_html(
                     <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
                         <!-- Header -->
                         <tr>
-                            <td style="background: linear-gradient(135deg, #6C3FC5 0%, #8B5CF6 100%); padding: 32px 40px; text-align: center;">
+                            <td style="background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%); padding: 32px 40px; text-align: center;">
                                 <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Selfizee Transfer</h1>
                             </td>
                         </tr>
@@ -60,11 +60,11 @@ def _build_transfer_email_html(
                                     Vous avez reçu des fichiers !
                                 </h2>
                                 <p style="margin: 0 0 8px 0; color: #555; font-size: 16px; line-height: 1.6;">
-                                    <strong style="color: #6C3FC5;">{sender_name}</strong> vous a envoyé des fichiers via Selfizee Transfer.
+                                    <strong style="color: #0693e3;">{sender_name}</strong> vous a envoyé des fichiers via Selfizee Transfer.
                                 </p>
                                 {message_block}
                                 <div style="text-align: center; margin: 32px 0;">
-                                    <a href="{download_url}" style="display: inline-block; background: linear-gradient(135deg, #6C3FC5 0%, #8B5CF6 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.3px;">
+                                    <a href="{download_url}" style="display: inline-block; background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.3px;">
                                         Télécharger les fichiers
                                     </a>
                                 </div>
@@ -75,9 +75,9 @@ def _build_transfer_email_html(
                         </tr>
                         <!-- Footer -->
                         <tr>
-                            <td style="background-color: #f9f7fc; padding: 24px 40px; text-align: center; border-top: 1px solid #ede8f5;">
+                            <td style="background-color: #f0f8ff; padding: 24px 40px; text-align: center; border-top: 1px solid #d9f0ff;">
                                 <p style="margin: 0; color: #999; font-size: 12px;">
-                                    Propulsé par <strong style="color: #6C3FC5;">Selfizee Transfer</strong><br>
+                                    Propulsé par <strong style="color: #0693e3;">Selfizee Transfer</strong><br>
                                     Le partage de fichiers sécurisé, simplifié.
                                 </p>
                             </td>
@@ -104,7 +104,8 @@ async def send_transfer_email(
     """
     try:
         msg = MIMEMultipart("alternative")
-        msg["From"] = settings.SMTP_FROM
+        msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
+        msg["Reply-To"] = "noreply@konitys.fr"
         msg["To"] = recipient_email
         msg["Subject"] = f"{sender_name} vous a envoyé des fichiers via Selfizee Transfer"
 
@@ -128,14 +129,18 @@ async def send_transfer_email(
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_body, "html"))
 
-        await aiosmtplib.send(
-            msg,
-            hostname=settings.SMTP_HOST,
-            port=settings.SMTP_PORT,
-            username=settings.SMTP_USER or None,
-            password=settings.SMTP_PASSWORD or None,
-            start_tls=True if settings.SMTP_PORT == 587 else False,
-        )
+        smtp_kwargs = {
+            "hostname": settings.SMTP_HOST,
+            "port": settings.SMTP_PORT,
+            "username": settings.SMTP_USER or None,
+            "password": settings.SMTP_PASSWORD or None,
+        }
+        if settings.SMTP_PORT == 465:
+            smtp_kwargs["use_tls"] = True
+        elif settings.SMTP_PORT == 587:
+            smtp_kwargs["start_tls"] = True
+
+        await aiosmtplib.send(msg, **smtp_kwargs)
 
         logger.info("Transfer email sent to %s", recipient_email)
 
@@ -159,11 +164,11 @@ def _build_expiry_notification_html(
 
     if is_sender:
         title = "Votre transfert expire bientôt"
-        intro = f"Votre transfert envoyé à <strong style=\"color: #6C3FC5;\">{transfer_recipient_email}</strong> n'a pas encore été téléchargé et expire le <strong>{expiry_str}</strong>."
+        intro = f"Votre transfert envoyé à <strong style=\"color: #0693e3;\">{transfer_recipient_email}</strong> n'a pas encore été téléchargé et expire le <strong>{expiry_str}</strong>."
         cta_text = "Voir le transfert"
     else:
         title = "Un transfert va bientôt expirer"
-        intro = f"<strong style=\"color: #6C3FC5;\">{sender_name}</strong> vous a envoyé des fichiers que vous n'avez pas encore téléchargés. Ce lien expire le <strong>{expiry_str}</strong>."
+        intro = f"<strong style=\"color: #0693e3;\">{sender_name}</strong> vous a envoyé des fichiers que vous n'avez pas encore téléchargés. Ce lien expire le <strong>{expiry_str}</strong>."
         cta_text = "Télécharger les fichiers"
 
     return f"""
@@ -209,7 +214,7 @@ def _build_expiry_notification_html(
                         <tr>
                             <td style="background-color: #fdf8f3; padding: 24px 40px; text-align: center; border-top: 1px solid #f5e6d3;">
                                 <p style="margin: 0; color: #999; font-size: 12px;">
-                                    Propulsé par <strong style="color: #6C3FC5;">Selfizee Transfer</strong><br>
+                                    Propulsé par <strong style="color: #0693e3;">Selfizee Transfer</strong><br>
                                     Le partage de fichiers sécurisé, simplifié.
                                 </p>
                             </td>
@@ -237,7 +242,8 @@ async def send_expiry_notification_email(
     """
     try:
         msg = MIMEMultipart("alternative")
-        msg["From"] = settings.SMTP_FROM
+        msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
+        msg["Reply-To"] = "noreply@konitys.fr"
         msg["To"] = recipient_email
 
         if is_sender:
@@ -271,14 +277,18 @@ async def send_expiry_notification_email(
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_body, "html"))
 
-        await aiosmtplib.send(
-            msg,
-            hostname=settings.SMTP_HOST,
-            port=settings.SMTP_PORT,
-            username=settings.SMTP_USER or None,
-            password=settings.SMTP_PASSWORD or None,
-            start_tls=True if settings.SMTP_PORT == 587 else False,
-        )
+        smtp_kwargs = {
+            "hostname": settings.SMTP_HOST,
+            "port": settings.SMTP_PORT,
+            "username": settings.SMTP_USER or None,
+            "password": settings.SMTP_PASSWORD or None,
+        }
+        if settings.SMTP_PORT == 465:
+            smtp_kwargs["use_tls"] = True
+        elif settings.SMTP_PORT == 587:
+            smtp_kwargs["start_tls"] = True
+
+        await aiosmtplib.send(msg, **smtp_kwargs)
 
         logger.info("Expiry notification email sent to %s", recipient_email)
 
