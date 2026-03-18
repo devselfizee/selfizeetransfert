@@ -8,6 +8,7 @@ services:
         - NEXT_PUBLIC_KEYCLOAK_URL=${NEXT_PUBLIC_KEYCLOAK_URL:-https://plateform-auth.konitys.fr}
         - NEXT_PUBLIC_KEYCLOAK_REALM=${NEXT_PUBLIC_KEYCLOAK_REALM:-konitys}
         - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-plateform-frontend}
+        - NEXT_PUBLIC_PLATFORM_URL=${NEXT_PUBLIC_PLATFORM_URL:-https://plateform.konitys.fr}
     restart: unless-stopped
     expose:
       - "3000"
@@ -17,6 +18,7 @@ services:
       - NEXT_PUBLIC_KEYCLOAK_URL=${NEXT_PUBLIC_KEYCLOAK_URL:-https://plateform-auth.konitys.fr}
       - NEXT_PUBLIC_KEYCLOAK_REALM=${NEXT_PUBLIC_KEYCLOAK_REALM:-konitys}
       - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-plateform-frontend}
+      - NEXT_PUBLIC_PLATFORM_URL=${NEXT_PUBLIC_PLATFORM_URL:-https://plateform.konitys.fr}
     depends_on:
       - backend
     networks:

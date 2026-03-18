@@ -5,11 +5,13 @@ services:
       args:
         - NEXT_PUBLIC_API_URL=https://localhost:8443/api
         - NEXT_PUBLIC_BASE_URL=https://localhost:8443
+        - NEXT_PUBLIC_PLATFORM_URL=https://plateform.konitys.fr
     container_name: selfizee-frontend
     restart: unless-stopped
     environment:
       - NEXT_PUBLIC_API_URL=https://localhost:8443/api
       - NEXT_PUBLIC_BASE_URL=https://localhost:8443
+      - NEXT_PUBLIC_PLATFORM_URL=https://plateform.konitys.fr
     depends_on:
       - backend
     networks:
