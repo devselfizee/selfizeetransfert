@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import Navbar from '@/components/Navbar';
@@ -15,6 +15,19 @@ export default function UploadPage() {
   const [files, setFiles] = useState<File[]>([]);
   const { progress, isUploading, error, uploadFiles, cancel } = useUpload();
   const { addTransfer } = useTransferStore();
+
+  // Warn user before leaving page during upload
+  useEffect(() => {
+    if (!isUploading) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isUploading]);
 
   const handleSubmit = async (data: {
     recipient_email: string;
