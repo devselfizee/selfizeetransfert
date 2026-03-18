@@ -83,7 +83,7 @@ export default function DownloadPageComponent({ downloadInfo, token }: DownloadP
 
       <main className="flex-1 flex items-start justify-center p-4 pt-8 sm:pt-16">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm max-w-lg w-full overflow-hidden">
-          <div className="bg-gradient-to-br from-primary to-primary-light p-6 text-white">
+          <div className="bg-brand-gradient p-6 text-white">
             <h1 className="text-xl font-semibold mb-1">
               Vous avez reçu des fichiers
             </h1>

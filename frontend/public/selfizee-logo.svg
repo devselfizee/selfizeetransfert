@@ -1,9 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
-  <rect x="0" y="8" width="34" height="34" rx="8" fill="#6C3FC5"/>
-  <path d="M10 28L15 23L20 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M15 23V35" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M24 20L27 17L30 20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M27 17V26" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  <text x="42" y="33" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="22" fill="#1a1a2e">selfizee</text>
-  <text x="152" y="33" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="22" fill="#6C3FC5">transfer</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 50" fill="none">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0693e3"/>
+      <stop offset="100%" style="stop-color:#9b51e0"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="8" width="34" height="34" rx="8" fill="url(#logoGrad)"/>
+  <path d="M10 20L17 27L24 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M17 27V13" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M8 32H26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="42" y="33" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="22" fill="#313131">selfizee</text>
+  <text x="152" y="33" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="22" fill="#0693e3">Transfer</text>
 </svg>

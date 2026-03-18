@@ -37,7 +37,7 @@ export default function UploadProgress({
 
       <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
         <div
-          className="bg-gradient-to-r from-primary to-primary-light h-3 rounded-full transition-all duration-300 ease-out"
+          className="bg-brand-gradient h-3 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${percent}%` }}
         />
       </div>

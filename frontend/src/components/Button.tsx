@@ -17,7 +17,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
           {
-            'bg-primary text-white hover:bg-primary-dark focus:ring-primary-light shadow-sm hover:shadow-md':
+            'bg-brand-gradient text-white hover:opacity-90 focus:ring-primary-light shadow-sm hover:shadow-md':
               variant === 'primary',
             'bg-white text-primary border border-primary/30 hover:bg-primary-50 focus:ring-primary-light':
               variant === 'secondary',

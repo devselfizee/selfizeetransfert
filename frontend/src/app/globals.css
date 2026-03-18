@@ -27,4 +27,15 @@
     background-color: #d1d5db;
     border-radius: 3px;
   }
+
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%);
+  }
+
+  .text-brand-gradient {
+    background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
