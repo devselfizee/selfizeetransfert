@@ -1,9 +1,23 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import keycloak from '@/lib/keycloak';
 import * as api from '@/lib/api';
+import { setTokenGetter } from '@/lib/api';
+
+let keycloakInstance: import('keycloak-js').default | null = null;
+
+async function getKeycloak() {
+  if (!keycloakInstance) {
+    const { default: Keycloak } = await import('keycloak-js');
+    keycloakInstance = new Keycloak({
+      url: process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'https://plateform-auth.konitys.fr',
+      realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'konitys',
+      clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'plateform-frontend',
+    });
+  }
+  return keycloakInstance;
+}
 
 export function useAuth() {
   const { user, token, isInitialized, setAuth, setToken, clearAuth, setInitialized } = useAuthStore();
@@ -13,33 +27,37 @@ export function useAuth() {
   const isAuthenticated = !!token && !!user;
 
   const initialize = useCallback(async () => {
+    if (typeof window === 'undefined') return;
     if (initRef.current) return;
     initRef.current = true;
 
     try {
-      const authenticated = await keycloak.init({
+      const kc = await getKeycloak();
+
+      const authenticated = await kc.init({
         onLoad: 'login-required',
         checkLoginIframe: false,
         pkceMethod: 'S256',
       });
 
-      if (authenticated && keycloak.token) {
-        setToken(keycloak.token);
+      if (authenticated && kc.token) {
+        setToken(kc.token);
+        setTokenGetter(() => kc.token);
 
         // Fetch user profile from backend
-        const me = await api.getMe(keycloak.token);
-        setAuth(me, keycloak.token);
+        const me = await api.getMe(kc.token);
+        setAuth(me, kc.token);
 
         // Set up token refresh
         setInterval(async () => {
           try {
-            const refreshed = await keycloak.updateToken(30);
-            if (refreshed && keycloak.token) {
-              setToken(keycloak.token);
+            const refreshed = await kc.updateToken(30);
+            if (refreshed && kc.token) {
+              setToken(kc.token);
             }
           } catch {
             clearAuth();
-            keycloak.login();
+            kc.login();
           }
         }, 30000);
       }
@@ -51,9 +69,10 @@ export function useAuth() {
     }
   }, [setAuth, setToken, clearAuth, setInitialized]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     clearAuth();
-    keycloak.logout({
+    const kc = await getKeycloak();
+    kc.logout({
       redirectUri: window.location.origin,
     });
   }, [clearAuth]);

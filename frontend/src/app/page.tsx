@@ -2,11 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function HomePage() {
   const router = useRouter();
-  const { initialize, token, isInitialized } = useAuthStore();
+  const { initialize, isAuthenticated, isInitialized } = useAuth();
 
   useEffect(() => {
     initialize();
@@ -14,13 +14,12 @@ export default function HomePage() {
 
   useEffect(() => {
     if (isInitialized) {
-      if (token) {
+      if (isAuthenticated) {
         router.replace('/dashboard');
-      } else {
-        router.replace('/login');
       }
+      // Keycloak will handle redirect to login if not authenticated
     }
-  }, [isInitialized, token, router]);
+  }, [isInitialized, isAuthenticated, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

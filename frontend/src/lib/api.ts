@@ -1,6 +1,5 @@
 import axios, { AxiosProgressEvent } from 'axios';
 import { Transfer, TransferListResponse, DownloadInfo, User } from './types';
-import keycloak from './keycloak';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
@@ -9,15 +8,19 @@ const api = axios.create({
   },
 });
 
+// Token getter - will be set by useAuth hook after Keycloak init
+let getToken: (() => string | undefined) | null = null;
+
+export function setTokenGetter(fn: () => string | undefined) {
+  getToken = fn;
+}
+
 api.interceptors.request.use(async (config) => {
-  if (typeof window !== 'undefined' && keycloak.token) {
-    // Refresh token if it expires within 30 seconds
-    try {
-      await keycloak.updateToken(30);
-    } catch {
-      // Token refresh failed, will be handled by response interceptor
+  if (typeof window !== 'undefined' && getToken) {
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    config.headers.Authorization = `Bearer ${keycloak.token}`;
   }
   return config;
 });
@@ -26,9 +29,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      // Token invalid, redirect to Keycloak login
       if (!window.location.pathname.startsWith('/download')) {
-        keycloak.login();
+        // Will be handled by Keycloak token refresh in useAuth
       }
     }
     return Promise.reject(error);
