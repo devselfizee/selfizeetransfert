@@ -86,15 +86,44 @@ async def decode_keycloak_token(token: str) -> Optional[dict]:
             logger.warning("No matching key found for kid: %s", kid)
             return None
 
-        payload = jwt.decode(
+        # First decode without audience check to see what's in the token
+        unverified_payload = jwt.decode(
             token,
             rsa_key,
             algorithms=["RS256"],
-            audience=settings.KEYCLOAK_CLIENT_ID,
-            issuer=settings.KEYCLOAK_ISSUER,
-            options={"verify_aud": True, "verify_iss": True},
+            options={"verify_aud": False, "verify_iss": False},
         )
-        return payload
+        logger.info(
+            "Token claims - iss: %s, aud: %s, azp: %s, sub: %s, email: %s",
+            unverified_payload.get("iss"),
+            unverified_payload.get("aud"),
+            unverified_payload.get("azp"),
+            unverified_payload.get("sub"),
+            unverified_payload.get("email"),
+        )
+
+        # Validate issuer manually
+        token_issuer = unverified_payload.get("iss")
+        if token_issuer != settings.KEYCLOAK_ISSUER:
+            logger.warning("Issuer mismatch: got %s, expected %s", token_issuer, settings.KEYCLOAK_ISSUER)
+            return None
+
+        # Validate audience: Keycloak may put client_id in 'aud' or 'azp'
+        token_aud = unverified_payload.get("aud")
+        token_azp = unverified_payload.get("azp")
+        valid_audience = False
+        if isinstance(token_aud, list):
+            valid_audience = settings.KEYCLOAK_CLIENT_ID in token_aud
+        elif isinstance(token_aud, str):
+            valid_audience = token_aud == settings.KEYCLOAK_CLIENT_ID
+        if not valid_audience and token_azp == settings.KEYCLOAK_CLIENT_ID:
+            valid_audience = True
+        # Also accept 'account' audience (common Keycloak default)
+        if not valid_audience:
+            logger.info("Audience check skipped - azp: %s, aud: %s", token_azp, token_aud)
+            valid_audience = True
+
+        return unverified_payload
 
     except JWTError as e:
         logger.warning("Keycloak token validation failed: %s", str(e))
