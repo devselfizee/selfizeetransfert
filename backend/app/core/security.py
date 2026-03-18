@@ -1,9 +1,10 @@
 import logging
 import secrets
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-import bcrypt
+import httpx
 import redis.asyncio as redis
 from jose import JWTError, jwt
 
@@ -12,6 +13,11 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 _redis_client: Optional[redis.Redis] = None
+
+# JWKS cache
+_jwks_cache: Optional[dict] = None
+_jwks_cache_time: float = 0
+JWKS_CACHE_TTL = 3600  # 1 hour
 
 
 async def get_redis() -> redis.Redis:
@@ -26,46 +32,76 @@ async def get_redis() -> redis.Redis:
     return _redis_client
 
 
-def hash_password(password: str) -> str:
-    """Hash a plaintext password."""
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+async def fetch_jwks() -> dict:
+    """Fetch JWKS from Keycloak, with caching."""
+    global _jwks_cache, _jwks_cache_time
+
+    now = time.time()
+    if _jwks_cache and (now - _jwks_cache_time) < JWKS_CACHE_TTL:
+        return _jwks_cache
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(settings.KEYCLOAK_JWKS_URL)
+        response.raise_for_status()
+        _jwks_cache = response.json()
+        _jwks_cache_time = now
+        logger.info("JWKS keys fetched from Keycloak")
+        return _jwks_cache
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plaintext password against a hash."""
-    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
-
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Create a JWT access token."""
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (
-        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-
-
-def decode_access_token(token: str) -> Optional[dict]:
-    """Decode and verify a JWT access token. Returns None if invalid."""
+async def decode_keycloak_token(token: str) -> Optional[dict]:
+    """
+    Decode and validate a Keycloak access token using JWKS.
+    Returns the token payload or None if invalid.
+    """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        jwks = await fetch_jwks()
+
+        # Get the key ID from the token header
+        unverified_header = jwt.get_unverified_header(token)
+        kid = unverified_header.get("kid")
+
+        if not kid:
+            logger.warning("Token has no kid in header")
+            return None
+
+        # Find the matching key
+        rsa_key = None
+        for key in jwks.get("keys", []):
+            if key.get("kid") == kid:
+                rsa_key = key
+                break
+
+        if not rsa_key:
+            # Key not found, maybe keys rotated — force refresh
+            global _jwks_cache_time
+            _jwks_cache_time = 0
+            jwks = await fetch_jwks()
+            for key in jwks.get("keys", []):
+                if key.get("kid") == kid:
+                    rsa_key = key
+                    break
+
+        if not rsa_key:
+            logger.warning("No matching key found for kid: %s", kid)
+            return None
+
+        payload = jwt.decode(
+            token,
+            rsa_key,
+            algorithms=["RS256"],
+            audience=settings.KEYCLOAK_CLIENT_ID,
+            issuer=settings.KEYCLOAK_ISSUER,
+            options={"verify_aud": True, "verify_iss": True},
+        )
         return payload
-    except JWTError:
+
+    except JWTError as e:
+        logger.warning("Keycloak token validation failed: %s", str(e))
         return None
-
-
-async def is_token_blacklisted(token: str) -> bool:
-    """Check if a token has been blacklisted (logged out)."""
-    r = await get_redis()
-    result = await r.get(f"blacklist:{token}")
-    return result is not None
-
-
-async def blacklist_token(token: str, expires_in_seconds: int) -> None:
-    """Add a token to the blacklist with a TTL matching its expiry."""
-    r = await get_redis()
-    await r.setex(f"blacklist:{token}", expires_in_seconds, "1")
+    except Exception as e:
+        logger.error("Error decoding Keycloak token: %s", str(e))
+        return None
 
 
 async def check_rate_limit(key: str, max_attempts: int, window_seconds: int) -> bool:

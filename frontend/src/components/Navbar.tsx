@@ -4,17 +4,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { PlusIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
 import Button from './Button';
 
 export default function Navbar() {
   const router = useRouter();
-  const { user, clearAuth } = useAuthStore();
-
-  const handleLogout = () => {
-    clearAuth();
-    router.push('/login');
-  };
+  const { user, logout } = useAuth();
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
@@ -55,7 +50,7 @@ export default function Navbar() {
             </div>
 
             <button
-              onClick={handleLogout}
+              onClick={logout}
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors p-2 rounded-lg hover:bg-gray-100"
               title="Se déconnecter"
             >

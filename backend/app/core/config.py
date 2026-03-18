@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
 
+    # Keycloak SSO
+    KEYCLOAK_URL: str = "https://plateform-auth.konitys.fr"
+    KEYCLOAK_REALM: str = "konitys"
+    KEYCLOAK_CLIENT_ID: str = "plateform-frontend"
+    KEYCLOAK_JWKS_URL: str = "https://plateform-auth.konitys.fr/realms/konitys/protocol/openid-connect/certs"
+    KEYCLOAK_ISSUER: str = "https://plateform-auth.konitys.fr/realms/konitys"
+
     STORAGE_PATH: str = "/storage/transfers"
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024 * 1024  # 10 GB in bytes
 

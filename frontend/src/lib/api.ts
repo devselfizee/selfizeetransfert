@@ -1,5 +1,6 @@
 import axios, { AxiosProgressEvent } from 'axios';
-import { LoginResponse, Transfer, TransferListResponse, DownloadInfo, User } from './types';
+import { Transfer, TransferListResponse, DownloadInfo, User } from './types';
+import keycloak from './keycloak';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
@@ -8,12 +9,15 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(async (config) => {
+  if (typeof window !== 'undefined' && keycloak.token) {
+    // Refresh token if it expires within 30 seconds
+    try {
+      await keycloak.updateToken(30);
+    } catch {
+      // Token refresh failed, will be handled by response interceptor
     }
+    config.headers.Authorization = `Bearer ${keycloak.token}`;
   }
   return config;
 });
@@ -22,23 +26,18 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/download')) {
-        window.location.href = '/login';
+      // Token invalid, redirect to Keycloak login
+      if (!window.location.pathname.startsWith('/download')) {
+        keycloak.login();
       }
     }
     return Promise.reject(error);
   }
 );
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
-  const response = await api.post<LoginResponse>('/auth/login', { email, password });
-  return response.data;
-}
-
-export async function getMe(): Promise<User> {
-  const response = await api.get<User>('/auth/me');
+export async function getMe(token?: string): Promise<User> {
+  const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  const response = await api.get<User>('/auth/me', config);
   return response.data;
 }
 

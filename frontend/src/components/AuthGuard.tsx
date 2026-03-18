@@ -1,28 +1,20 @@
 'use client';
 
 import { useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AuthGuardProps {
   children: ReactNode;
 }
 
 export default function AuthGuard({ children }: AuthGuardProps) {
-  const router = useRouter();
-  const { token, isInitialized, initialize } = useAuthStore();
+  const { isAuthenticated, isInitialized, isLoading, initialize } = useAuth();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  useEffect(() => {
-    if (isInitialized && !token) {
-      router.push('/login');
-    }
-  }, [isInitialized, token, router]);
-
-  if (!isInitialized) {
+  if (!isInitialized || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
@@ -33,7 +25,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!token) {
+  if (!isAuthenticated) {
     return null;
   }
 

@@ -1,62 +1,69 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
+import keycloak from '@/lib/keycloak';
 import * as api from '@/lib/api';
 
 export function useAuth() {
-  const router = useRouter();
-  const { user, token, isInitialized, setAuth, clearAuth, initialize } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, token, isInitialized, setAuth, setToken, clearAuth, setInitialized } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const initRef = useRef(false);
 
   const isAuthenticated = !!token && !!user;
 
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
+  const initialize = useCallback(async () => {
+    if (initRef.current) return;
+    initRef.current = true;
+
     try {
-      const response = await api.login(email, password);
-      setAuth(response.user, response.token);
-      router.push('/dashboard');
-    } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Identifiants incorrects. Veuillez réessayer.';
-      setError(message);
-      throw err;
+      const authenticated = await keycloak.init({
+        onLoad: 'login-required',
+        checkLoginIframe: false,
+        pkceMethod: 'S256',
+      });
+
+      if (authenticated && keycloak.token) {
+        setToken(keycloak.token);
+
+        // Fetch user profile from backend
+        const me = await api.getMe(keycloak.token);
+        setAuth(me, keycloak.token);
+
+        // Set up token refresh
+        setInterval(async () => {
+          try {
+            const refreshed = await keycloak.updateToken(30);
+            if (refreshed && keycloak.token) {
+              setToken(keycloak.token);
+            }
+          } catch {
+            clearAuth();
+            keycloak.login();
+          }
+        }, 30000);
+      }
+    } catch (error) {
+      console.error('Keycloak init failed:', error);
     } finally {
+      setInitialized();
       setIsLoading(false);
     }
-  }, [setAuth, router]);
+  }, [setAuth, setToken, clearAuth, setInitialized]);
 
   const logout = useCallback(() => {
     clearAuth();
-    router.push('/login');
-  }, [clearAuth, router]);
-
-  const checkAuth = useCallback(async () => {
-    if (!token) return false;
-    try {
-      const me = await api.getMe();
-      setAuth(me, token);
-      return true;
-    } catch {
-      clearAuth();
-      return false;
-    }
-  }, [token, setAuth, clearAuth]);
+    keycloak.logout({
+      redirectUri: window.location.origin,
+    });
+  }, [clearAuth]);
 
   return {
     user,
     isAuthenticated,
     isLoading,
     isInitialized,
-    error,
-    login,
-    logout,
-    checkAuth,
     initialize,
+    logout,
   };
 }
