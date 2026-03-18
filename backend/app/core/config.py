@@ -25,11 +25,11 @@ class Settings(BaseSettings):
     STORAGE_PATH: str = "/storage/transfers"
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024 * 1024  # 10 GB in bytes
 
-    SMTP_HOST: str = "localhost"
-    SMTP_PORT: int = 587
-    SMTP_USER: str = ""
-    SMTP_PASSWORD: str = ""
-    SMTP_FROM: str = "noreply@selfizee.local"
+    SMTP_HOST: str = "in-v3.mailjet.com"
+    SMTP_PORT: int = 465
+    SMTP_USER: str = "4413cf13ca9e713fafba8cbd5e902da1"
+    SMTP_PASSWORD: str = "4a12caacca18c678ac70f53faaed5a22"
+    SMTP_FROM: str = "contact@selfizee.fr"
 
     BASE_URL: str = "https://transfer.selfizee.local"
 
