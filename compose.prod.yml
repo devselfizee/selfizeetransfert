@@ -1,0 +1,62 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=${BASE_URL}/api
+        - NEXT_PUBLIC_BASE_URL=${BASE_URL}
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=${BASE_URL}/api
+      - NEXT_PUBLIC_BASE_URL=${BASE_URL}
+    depends_on:
+      - backend
+    networks:
+      - selfizee-net
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - storage_data:/storage
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - selfizee-net
+
+  celery-worker:
+    build: ./backend
+    restart: unless-stopped
+    command: bash celery_worker.sh
+    env_file:
+      - .env
+    volumes:
+      - storage_data:/storage
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - selfizee-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - selfizee-net
+
+volumes:
+  storage_data:
+
+networks:
+  selfizee-net:
+    driver: bridge
