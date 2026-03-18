@@ -48,29 +48,35 @@ async def get_current_user(
     # Extract user info from Keycloak claims
     keycloak_sub = payload.get("sub")
     email = payload.get("email")
-    full_name = payload.get("name") or payload.get("preferred_username") or "Utilisateur"
+    preferred_username = payload.get("preferred_username")
+    full_name = payload.get("name") or preferred_username or "Utilisateur"
 
-    if not keycloak_sub or not email:
+    if not keycloak_sub:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token missing required claims (sub, email)",
+            detail="Token missing required claim (sub)",
         )
 
-    # Find user by email
-    result = await db.execute(select(User).where(User.email == email))
+    # Use email if available, otherwise fall back to preferred_username or sub
+    user_identifier = email or preferred_username or f"{keycloak_sub}@keycloak.local"
+
+    logger.info("Keycloak user: sub=%s, email=%s, username=%s, name=%s", keycloak_sub, email, preferred_username, full_name)
+
+    # Find user by email/identifier
+    result = await db.execute(select(User).where(User.email == user_identifier))
     user = result.scalar_one_or_none()
 
     if user is None:
         # Auto-provision user from Keycloak
         user = User(
-            email=email,
+            email=user_identifier,
             full_name=full_name,
             password_hash="keycloak-sso",
             is_active=True,
         )
         db.add(user)
         await db.flush()
-        logger.info("Auto-provisioned user %s from Keycloak (sub: %s)", email, keycloak_sub)
+        logger.info("Auto-provisioned user %s from Keycloak (sub: %s)", user_identifier, keycloak_sub)
     else:
         # Update name if changed in Keycloak
         if user.full_name != full_name:
