@@ -34,7 +34,12 @@ class Settings(BaseSettings):
     BASE_URL: str = "https://transfer.selfizee.local"
 
     BLOCKED_EXTENSIONS: List[str] = [".exe", ".bat", ".cmd", ".sh", ".ps1", ".vbs"]
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "https://transfer.selfizee.local"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "https://transfer.selfizee.local",
+        "https://transfert.konitys.fr",
+        "https://transfert-api.konitys.fr",
+    ]
 
     model_config = {
         "env_file": ".env",
