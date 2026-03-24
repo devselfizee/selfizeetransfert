@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = "4a12caacca18c678ac70f53faaed5a22"
     SMTP_FROM: str = "contact@selfizee.fr"
 
-    BASE_URL: str = "https://transfer.selfizee.local"
+    BASE_URL: str = "https://transfert.konitys.fr"
 
     BLOCKED_EXTENSIONS: List[str] = [".exe", ".bat", ".cmd", ".sh", ".ps1", ".vbs"]
     CORS_ORIGINS: List[str] = [
