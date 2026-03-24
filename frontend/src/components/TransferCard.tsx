@@ -72,7 +72,7 @@ export default function TransferCard({ transfer, onDelete }: TransferCardProps) 
               </span>
               <span className="flex items-center gap-1">
                 <ArrowDownTrayIcon className="h-3.5 w-3.5" />
-                {transfer.download_count} téléchargement{transfer.download_count !== 1 ? 's' : ''}
+                {transfer.download_count} téléchargement{transfer.download_count > 1 ? 's' : ''}
               </span>
               <span>{formatFileSize(transfer.total_size)}</span>
             </div>
