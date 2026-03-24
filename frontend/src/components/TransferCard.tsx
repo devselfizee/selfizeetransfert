@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   ClipboardDocumentIcon,
   TrashIcon,
   CheckIcon,
   ClockIcon,
   ArrowDownTrayIcon,
+  EyeIcon,
 } from '@heroicons/react/24/outline';
 import { Transfer } from '@/lib/types';
 import { formatDate, formatTimeRemaining, formatFileSize, isExpired, copyToClipboard, getDownloadUrl } from '@/lib/utils';
@@ -85,6 +87,16 @@ export default function TransferCard({ transfer, onDelete }: TransferCardProps) 
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            {!expired && (
+              <Link
+                href={`/download/${transfer.token}`}
+                target="_blank"
+                className="p-2 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-lg transition-all"
+                title="Voir la page de téléchargement"
+              >
+                <EyeIcon className="h-4 w-4" />
+              </Link>
+            )}
             {!expired && (
               <button
                 onClick={handleCopyLink}
