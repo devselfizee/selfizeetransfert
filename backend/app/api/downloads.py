@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import uuid
@@ -15,6 +16,7 @@ from app.schemas.file import FileResponse
 from app.schemas.transfer import TransferResponse
 from app.services.file_service import create_zip
 from app.services.transfer_service import get_transfer_by_token
+from app.services.email_service import send_first_download_email
 
 logger = logging.getLogger(__name__)
 
@@ -92,8 +94,25 @@ async def download_file(
         )
 
     # Increment download count
+    is_first_download = transfer.download_count == 0
     transfer.download_count += 1
     await db.flush()
+
+    # Notify sender on first download
+    if is_first_download and not transfer.first_download_notified and transfer.user:
+        transfer.first_download_notified = True
+        await db.flush()
+        download_url = f"{settings.BASE_URL}/download/{transfer.token}"
+        asyncio.create_task(
+            send_first_download_email(
+                sender_email=transfer.user.email,
+                recipient_email=transfer.recipient_email,
+                download_url=download_url,
+                expires_at=transfer.expires_at,
+                files=list(transfer.files),
+                total_size=transfer.total_size,
+            )
+        )
 
     logger.info(
         "File %s downloaded from transfer %s (download #%d)",
@@ -141,8 +160,25 @@ async def download_zip(
     zip_buffer = await create_zip(file_list, transfer.token)
 
     # Increment download count
+    is_first_download = transfer.download_count == 0
     transfer.download_count += 1
     await db.flush()
+
+    # Notify sender on first download
+    if is_first_download and not transfer.first_download_notified and transfer.user:
+        transfer.first_download_notified = True
+        await db.flush()
+        download_url = f"{settings.BASE_URL}/download/{transfer.token}"
+        asyncio.create_task(
+            send_first_download_email(
+                sender_email=transfer.user.email,
+                recipient_email=transfer.recipient_email,
+                download_url=download_url,
+                expires_at=transfer.expires_at,
+                files=list(transfer.files),
+                total_size=transfer.total_size,
+            )
+        )
 
     logger.info(
         "ZIP download for transfer %s (download #%d)",

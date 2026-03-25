@@ -29,6 +29,7 @@ class Transfer(Base):
     total_size: Mapped[int] = mapped_column(BigInteger, default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     expiry_notified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    first_download_notified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
