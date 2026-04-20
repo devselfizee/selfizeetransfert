@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
 import { getDownloadInfo } from '@/lib/api';
 import { DownloadInfo } from '@/lib/types';
 import DownloadPageComponent from '@/components/DownloadPage';
+import Logo from '@/components/Logo';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 export default function DownloadTokenPage() {
@@ -34,14 +34,7 @@ export default function DownloadTokenPage() {
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b border-gray-200 py-4">
           <div className="max-w-2xl mx-auto px-4 flex justify-center">
-            <Image
-              src="/selfizee-logo.svg"
-              alt="Selfizee Transfer"
-              width={180}
-              height={40}
-              className="h-8 w-auto"
-              priority
-            />
+            <Logo height={32} />
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center">
@@ -59,14 +52,7 @@ export default function DownloadTokenPage() {
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b border-gray-200 py-4">
           <div className="max-w-2xl mx-auto px-4 flex justify-center">
-            <Image
-              src="/selfizee-logo.svg"
-              alt="Selfizee Transfer"
-              width={180}
-              height={40}
-              className="h-8 w-auto"
-              priority
-            />
+            <Logo height={32} />
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center p-4">

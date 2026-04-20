@@ -29,11 +29,11 @@
   }
 
   .bg-brand-gradient {
-    background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%);
+    background: linear-gradient(135deg, #fe0154 0%, #ff4d85 100%);
   }
 
   .text-brand-gradient {
-    background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%);
+    background: linear-gradient(135deg, #fe0154 0%, #ff4d85 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

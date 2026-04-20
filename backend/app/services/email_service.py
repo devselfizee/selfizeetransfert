@@ -11,6 +11,44 @@ from app.core.config import settings
 REPLY_TO = "noreply@selfizee.fr"
 UNSUBSCRIBE_MAILTO = "mailto:contact@selfizee.fr?subject=Unsubscribe"
 
+BRAND_PINK = "#fe0154"
+BRAND_PINK_DARK = "#c60140"
+LOGO_URL = "https://www.selfizee.fr/wp-content/themes/selfizee/images/logo_transparent_cropped.png"
+
+
+def _email_header_html() -> str:
+    return f"""
+        <tr>
+            <td style="background-color: #ffffff; padding: 24px 40px; text-align: center; border-bottom: 1px solid #f0f0f0;">
+                <img src="{LOGO_URL}" alt="Selfizee" width="140" style="display: inline-block; vertical-align: middle; height: auto;" />
+                <span style="display: inline-block; vertical-align: middle; margin-left: 10px; font-size: 22px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.3px;">Transfert</span>
+            </td>
+        </tr>
+    """
+
+
+def _email_footer_html() -> str:
+    return f"""
+        <tr>
+            <td style="background-color: #fafafa; padding: 20px 40px; text-align: center; border-top: 1px solid #f0f0f0;">
+                <p style="margin: 0; color: #999; font-size: 12px;">
+                    Propulsé par <strong style="color: {BRAND_PINK};">Selfizee Transfert</strong><br>
+                    Le partage de fichiers sécurisé, simplifié.
+                </p>
+            </td>
+        </tr>
+    """
+
+
+def _cta_button_html(href: str, label: str) -> str:
+    return f"""
+    <div style="text-align: center; margin: 32px 0;">
+        <a href="{href}" style="display: inline-block; background-color: {BRAND_PINK}; color: #ffffff; text-decoration: none; padding: 18px 56px; border-radius: 10px; font-size: 18px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 4px 12px rgba(254,1,84,0.35);">
+            {label}
+        </a>
+    </div>
+    """
+
 
 def _set_deliverability_headers(msg: MIMEMultipart, ref_id: str | None = None) -> None:
     """Headers that help transactional mail land in inbox (DKIM alignment + Gmail/Yahoo signals)."""
@@ -43,7 +81,7 @@ def _build_transfer_email_html(
     message_block = ""
     if message:
         message_block = f"""
-        <div style="background-color: #eef8ff; border-left: 4px solid #0693e3; padding: 16px; margin: 24px 0; border-radius: 4px;">
+        <div style="background-color: #fff1f5; border-left: 4px solid {BRAND_PINK}; padding: 16px; margin: 24px 0; border-radius: 4px;">
             <p style="margin: 0; color: #333; font-style: italic;">&laquo; {message} &raquo;</p>
         </div>
         """
@@ -60,41 +98,23 @@ def _build_transfer_email_html(
             <tr>
                 <td align="center">
                     <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                        <!-- Header -->
-                        <tr>
-                            <td style="background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%); padding: 32px 40px; text-align: center;">
-                                <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Selfizee Transfer</h1>
-                            </td>
-                        </tr>
-                        <!-- Body -->
+                        {_email_header_html()}
                         <tr>
                             <td style="padding: 40px;">
-                                <h2 style="margin: 0 0 16px 0; color: #1a1a2e; font-size: 22px; font-weight: 600;">
-                                    Vous avez reçu des fichiers !
+                                <h2 style="margin: 0 0 12px 0; color: #1a1a2e; font-size: 22px; font-weight: 600;">
+                                    Vous avez reçu des fichiers
                                 </h2>
                                 <p style="margin: 0 0 8px 0; color: #555; font-size: 16px; line-height: 1.6;">
-                                    <strong style="color: #0693e3;">{sender_name}</strong> vous a envoyé des fichiers via Selfizee Transfer.
+                                    De la part de <strong style="color: #1a1a2e;">{sender_name}</strong> (Selfizee).
                                 </p>
                                 {message_block}
-                                <div style="text-align: center; margin: 32px 0;">
-                                    <a href="{download_url}" style="display: inline-block; background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.3px;">
-                                        Télécharger les fichiers
-                                    </a>
-                                </div>
+                                {_cta_button_html(download_url, "Télécharger les fichiers")}
                                 <p style="margin: 24px 0 0 0; color: #888; font-size: 14px; text-align: center;">
                                     Ce lien expire le <strong>{expiry_str}</strong>
                                 </p>
                             </td>
                         </tr>
-                        <!-- Footer -->
-                        <tr>
-                            <td style="background-color: #f0f8ff; padding: 24px 40px; text-align: center; border-top: 1px solid #d9f0ff;">
-                                <p style="margin: 0; color: #999; font-size: 12px;">
-                                    Propulsé par <strong style="color: #0693e3;">Selfizee Transfer</strong><br>
-                                    Le partage de fichiers sécurisé, simplifié.
-                                </p>
-                            </td>
-                        </tr>
+                        {_email_footer_html()}
                     </table>
                 </td>
             </tr>
@@ -117,16 +137,16 @@ async def send_transfer_email(
     """
     try:
         msg = MIMEMultipart("alternative")
-        msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
+        msg["From"] = f"Selfizee Transfert <{settings.SMTP_FROM}>"
         msg["To"] = recipient_email
-        msg["Subject"] = f"{sender_name} vous a envoyé des fichiers via Selfizee Transfer"
+        msg["Subject"] = f"{sender_name} (Selfizee) vous a envoyé des fichiers"
         _set_deliverability_headers(msg)
 
         # Plain text fallback
         expiry_str = _format_date_fr(expires_at)
         plain_text = (
-            f"{sender_name} vous a envoyé des fichiers via Selfizee Transfer.\n\n"
-            f"Téléchargez-les ici : {download_url}\n\n"
+            f"De la part de {sender_name} (Selfizee).\n\n"
+            f"Téléchargez les fichiers ici : {download_url}\n\n"
         )
         if message:
             plain_text += f'Message : « {message} »\n\n'
@@ -193,49 +213,31 @@ def _build_first_download_email_html(
             <tr>
                 <td align="center">
                     <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                        <!-- Header -->
-                        <tr>
-                            <td style="background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%); padding: 32px 40px; text-align: center;">
-                                <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Selfizee Transfer</h1>
-                            </td>
-                        </tr>
-                        <!-- Body -->
+                        {_email_header_html()}
                         <tr>
                             <td style="padding: 40px;">
-                                <h2 style="margin: 0 0 16px 0; color: #1a1a2e; font-size: 22px; font-weight: 600;">
+                                <h2 style="margin: 0 0 12px 0; color: #1a1a2e; font-size: 22px; font-weight: 600;">
                                     Vos fichiers ont été téléchargés
                                 </h2>
                                 <p style="margin: 0 0 16px 0; color: #555; font-size: 16px; line-height: 1.6;">
                                     {file_count} élément{"s" if file_count > 1 else ""}, {total_size_str} au total &bull; Expire le {expiry_str}
                                 </p>
-                                <div style="background-color: #eef8ff; border-left: 4px solid #0693e3; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                                <div style="background-color: #fff1f5; border-left: 4px solid {BRAND_PINK}; padding: 16px; margin: 24px 0; border-radius: 4px;">
                                     <p style="margin: 0; color: #333; font-size: 14px;">
                                         Nous vous informons la première fois que votre transfert est téléchargé (nous ne vous enverrons pas d'email à chaque fois).
                                         Vous pouvez voir si ce transfert est téléchargé à nouveau dans votre compte.
                                     </p>
                                 </div>
-                                <div style="text-align: center; margin: 32px 0;">
-                                    <a href="{settings.BASE_URL}/dashboard" style="display: inline-block; background: linear-gradient(135deg, #0693e3 0%, #9b51e0 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.3px;">
-                                        Vérifiez vos transferts
-                                    </a>
-                                </div>
+                                {_cta_button_html(f"{settings.BASE_URL}/dashboard", "Vérifiez vos transferts")}
                                 <div style="margin: 24px 0; padding: 16px; background-color: #f9f9fb; border-radius: 8px;">
                                     <p style="margin: 0 0 8px 0; color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase;">Lien de téléchargement</p>
-                                    <p style="margin: 0 0 16px 0;"><a href="{download_url}" style="color: #0693e3; font-size: 14px; word-break: break-all;">{download_url}</a></p>
+                                    <p style="margin: 0 0 16px 0;"><a href="{download_url}" style="color: {BRAND_PINK}; font-size: 14px; word-break: break-all;">{download_url}</a></p>
                                     <p style="margin: 0 0 8px 0; color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase;">{file_count} élément{"s" if file_count > 1 else ""}</p>
                                     {files_html}
                                 </div>
                             </td>
                         </tr>
-                        <!-- Footer -->
-                        <tr>
-                            <td style="background-color: #f0f8ff; padding: 24px 40px; text-align: center; border-top: 1px solid #d9f0ff;">
-                                <p style="margin: 0; color: #999; font-size: 12px;">
-                                    Propulsé par <strong style="color: #0693e3;">Selfizee Transfer</strong><br>
-                                    Le partage de fichiers sécurisé, simplifié.
-                                </p>
-                            </td>
-                        </tr>
+                        {_email_footer_html()}
                     </table>
                 </td>
             </tr>
@@ -270,9 +272,9 @@ async def send_first_download_email(
     """
     try:
         msg = MIMEMultipart("alternative")
-        msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
+        msg["From"] = f"Selfizee Transfert <{settings.SMTP_FROM}>"
         msg["To"] = sender_email
-        msg["Subject"] = "Vos fichiers ont été téléchargés - Selfizee Transfer"
+        msg["Subject"] = "Vos fichiers ont été téléchargés - Selfizee Transfert"
         _set_deliverability_headers(msg)
 
         file_count = len(files)
@@ -342,11 +344,11 @@ def _build_expiry_notification_html(
 
     if is_sender:
         title = "Votre transfert expire bientôt"
-        intro = f"Votre transfert envoyé à <strong style=\"color: #0693e3;\">{transfer_recipient_email}</strong> n'a pas encore été téléchargé et expire le <strong>{expiry_str}</strong>."
+        intro = f"Votre transfert envoyé à <strong style=\"color: {BRAND_PINK};\">{transfer_recipient_email}</strong> n'a pas encore été téléchargé et expire le <strong>{expiry_str}</strong>."
         cta_text = "Voir le transfert"
     else:
         title = "Un transfert va bientôt expirer"
-        intro = f"<strong style=\"color: #0693e3;\">{sender_name}</strong> vous a envoyé des fichiers que vous n'avez pas encore téléchargés. Ce lien expire le <strong>{expiry_str}</strong>."
+        intro = f"De la part de <strong style=\"color: #1a1a2e;\">{sender_name}</strong> (Selfizee) : des fichiers vous ont été envoyés mais n'ont pas encore été téléchargés. Ce lien expire le <strong>{expiry_str}</strong>."
         cta_text = "Télécharger les fichiers"
 
     return f"""
@@ -361,16 +363,10 @@ def _build_expiry_notification_html(
             <tr>
                 <td align="center">
                     <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                        <!-- Header -->
-                        <tr>
-                            <td style="background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%); padding: 32px 40px; text-align: center;">
-                                <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Selfizee Transfer</h1>
-                            </td>
-                        </tr>
-                        <!-- Body -->
+                        {_email_header_html()}
                         <tr>
                             <td style="padding: 40px;">
-                                <h2 style="margin: 0 0 16px 0; color: #1a1a2e; font-size: 22px; font-weight: 600;">
+                                <h2 style="margin: 0 0 12px 0; color: #1a1a2e; font-size: 22px; font-weight: 600;">
                                     {title}
                                 </h2>
                                 <p style="margin: 0 0 8px 0; color: #555; font-size: 16px; line-height: 1.6;">
@@ -381,22 +377,10 @@ def _build_expiry_notification_html(
                                         Aucun téléchargement n'a été effectué pour le moment.
                                     </p>
                                 </div>
-                                <div style="text-align: center; margin: 32px 0;">
-                                    <a href="{download_url}" style="display: inline-block; background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 8px; font-size: 18px; font-weight: 600; letter-spacing: 0.3px;">
-                                        {cta_text}
-                                    </a>
-                                </div>
+                                {_cta_button_html(download_url, cta_text)}
                             </td>
                         </tr>
-                        <!-- Footer -->
-                        <tr>
-                            <td style="background-color: #fdf8f3; padding: 24px 40px; text-align: center; border-top: 1px solid #f5e6d3;">
-                                <p style="margin: 0; color: #999; font-size: 12px;">
-                                    Propulsé par <strong style="color: #0693e3;">Selfizee Transfer</strong><br>
-                                    Le partage de fichiers sécurisé, simplifié.
-                                </p>
-                            </td>
-                        </tr>
+                        {_email_footer_html()}
                     </table>
                 </td>
             </tr>
@@ -420,14 +404,14 @@ async def send_expiry_notification_email(
     """
     try:
         msg = MIMEMultipart("alternative")
-        msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
+        msg["From"] = f"Selfizee Transfert <{settings.SMTP_FROM}>"
         msg["To"] = recipient_email
         _set_deliverability_headers(msg)
 
         if is_sender:
             msg["Subject"] = "Votre transfert Selfizee expire bientôt sans téléchargement"
         else:
-            msg["Subject"] = f"{sender_name} vous a envoyé des fichiers - expiration imminente"
+            msg["Subject"] = f"{sender_name} (Selfizee) vous a envoyé des fichiers - expiration imminente"
 
         expiry_str = _format_date_fr(expires_at)
 

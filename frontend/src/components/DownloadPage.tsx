@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import {
   ArrowDownTrayIcon,
   DocumentIcon,
@@ -12,6 +11,7 @@ import { DownloadInfo } from '@/lib/types';
 import { formatFileSize, formatTimeRemaining, getExpirySeconds } from '@/lib/utils';
 import { getFileDownloadUrl, getZipDownloadUrl } from '@/lib/api';
 import Button from './Button';
+import Logo from './Logo';
 
 interface DownloadPageProps {
   downloadInfo: DownloadInfo;
@@ -41,14 +41,7 @@ export default function DownloadPageComponent({ downloadInfo, token }: DownloadP
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b border-gray-200 py-4">
           <div className="max-w-2xl mx-auto px-4 flex justify-center">
-            <Image
-              src="/selfizee-logo.svg"
-              alt="Selfizee Transfer"
-              width={180}
-              height={40}
-              className="h-8 w-auto"
-              priority
-            />
+            <Logo height={32} />
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center p-4">
@@ -70,14 +63,7 @@ export default function DownloadPageComponent({ downloadInfo, token }: DownloadP
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white border-b border-gray-200 py-4">
         <div className="max-w-2xl mx-auto px-4 flex justify-center">
-          <Image
-            src="/selfizee-logo.svg"
-            alt="Selfizee Transfer"
-            width={180}
-            height={40}
-            className="h-8 w-auto"
-            priority
-          />
+          <Logo height={32} />
         </div>
       </header>
 
@@ -88,7 +74,7 @@ export default function DownloadPageComponent({ downloadInfo, token }: DownloadP
               Vous avez reçu des fichiers
             </h1>
             <p className="text-sm text-white/80">
-              De la part de <strong>{downloadInfo.sender_name || downloadInfo.sender_email}</strong>
+              De la part de <strong>{downloadInfo.sender_name || downloadInfo.sender_email}</strong> (Selfizee)
             </p>
           </div>
 
@@ -150,7 +136,7 @@ export default function DownloadPageComponent({ downloadInfo, token }: DownloadP
 
       <footer className="py-6 text-center">
         <p className="text-xs text-gray-400">
-          Propulsé par <strong>Selfizee Transfer</strong>
+          Propulsé par <strong>Selfizee Transfert</strong>
         </p>
       </footer>
     </div>

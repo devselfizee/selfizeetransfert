@@ -24,7 +24,7 @@ export default function DashboardPage() {
         </div>
         <Link
           href="/upload"
-          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#0693e3] to-[#9b51e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark transition-colors"
         >
           <PlusIcon className="h-5 w-5" />
           Nouveau transfert

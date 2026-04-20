@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Selfizee Transfer - Envoi de fichiers sécurisé',
-  description: 'Envoyez vos fichiers en toute sécurité avec Selfizee Transfer.',
+  title: 'Selfizee Transfert - Envoi de fichiers sécurisé',
+  description: 'Envoyez vos fichiers en toute sécurité avec Selfizee Transfert.',
   icons: {
     icon: '/favicon.svg',
     apple: '/favicon.svg',

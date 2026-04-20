@@ -20,7 +20,7 @@ const RemoteSidebar = lazy(() =>
   loadRemoteComponent('./Sidebar', FallbackSidebar as React.ComponentType<Record<string, unknown>>)
 );
 
-// Sidebar navigation sections for Selfizee Transfer
+// Sidebar navigation sections for Selfizee Transfert
 const SIDEBAR_SECTIONS = [
   {
     label: 'TRANSFERTS',
@@ -53,7 +53,7 @@ export default function FederatedLayout({ children }: FederatedLayoutProps) {
   useEffect(() => {
     setReconnectCallback(() => {
       console.info(
-        '[Selfizee Transfer] Hub reconnected, reloading federated components...'
+        '[Selfizee Transfert] Hub reconnected, reloading federated components...'
       );
       forceRender((n) => n + 1);
     });
@@ -87,8 +87,8 @@ export default function FederatedLayout({ children }: FederatedLayoutProps) {
       <FederatedWrapper
         fallback={
           <FallbackHeaderBar
-            currentAppName="Selfizee Transfer"
-            currentAppColor="#0693e3"
+            currentAppName="Selfizee Transfert"
+            currentAppColor="#fe0154"
             user={headerUser}
             onLogout={logout}
           />
@@ -97,9 +97,9 @@ export default function FederatedLayout({ children }: FederatedLayoutProps) {
         <RemoteHeader
           user={headerUser}
           onLogout={logout}
-          currentAppName="Selfizee Transfer"
+          currentAppName="Selfizee Transfert"
           currentAppIcon="file-output"
-          currentAppColor="#0693e3"
+          currentAppColor="#fe0154"
           onNavigate={navigate}
           platformUrl={platformUrl}
         />

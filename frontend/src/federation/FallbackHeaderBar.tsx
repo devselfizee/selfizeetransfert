@@ -13,8 +13,8 @@ interface FallbackHeaderBarProps {
 }
 
 export default function FallbackHeaderBar({
-  currentAppName = 'Selfizee Transfer',
-  currentAppColor = '#0693e3',
+  currentAppName = 'Selfizee Transfert',
+  currentAppColor = '#fe0154',
   onLogout,
   user,
 }: FallbackHeaderBarProps) {

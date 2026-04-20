@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { PlusIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 import Button from './Button';
+import Logo from './Logo';
 
 export default function Navbar() {
   const router = useRouter();
@@ -16,14 +16,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/dashboard" className="flex-shrink-0">
-            <Image
-              src="/selfizee-logo.svg"
-              alt="Selfizee Transfer"
-              width={180}
-              height={40}
-              className="h-8 w-auto"
-              priority
-            />
+            <Logo height={32} />
           </Link>
 
           <div className="flex items-center gap-3">
