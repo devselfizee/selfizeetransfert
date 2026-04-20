@@ -20,6 +20,10 @@ nginx/ssl/*
 # Next.js
 .next/
 out/
+frontend/tsconfig.tsbuildinfo
+
+# Claude Code local state
+.claude/
 
 # Données PostgreSQL
 postgres_data/
