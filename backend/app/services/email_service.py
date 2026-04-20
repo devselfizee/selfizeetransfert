@@ -4,8 +4,21 @@ from datetime import datetime
 import aiosmtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import make_msgid
 
 from app.core.config import settings
+
+REPLY_TO = "noreply@selfizee.fr"
+UNSUBSCRIBE_MAILTO = "mailto:contact@selfizee.fr?subject=Unsubscribe"
+
+
+def _set_deliverability_headers(msg: MIMEMultipart, ref_id: str | None = None) -> None:
+    """Headers that help transactional mail land in inbox (DKIM alignment + Gmail/Yahoo signals)."""
+    msg["Reply-To"] = REPLY_TO
+    msg["Message-ID"] = make_msgid(domain="selfizee.fr")
+    msg["List-Unsubscribe"] = f"<{UNSUBSCRIBE_MAILTO}>"
+    if ref_id:
+        msg["X-Entity-Ref-ID"] = ref_id
 
 logger = logging.getLogger(__name__)
 
@@ -105,9 +118,9 @@ async def send_transfer_email(
     try:
         msg = MIMEMultipart("alternative")
         msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
-        msg["Reply-To"] = "noreply@konitys.fr"
         msg["To"] = recipient_email
         msg["Subject"] = f"{sender_name} vous a envoyé des fichiers via Selfizee Transfer"
+        _set_deliverability_headers(msg)
 
         # Plain text fallback
         expiry_str = _format_date_fr(expires_at)
@@ -258,9 +271,9 @@ async def send_first_download_email(
     try:
         msg = MIMEMultipart("alternative")
         msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
-        msg["Reply-To"] = "noreply@konitys.fr"
         msg["To"] = sender_email
         msg["Subject"] = "Vos fichiers ont été téléchargés - Selfizee Transfer"
+        _set_deliverability_headers(msg)
 
         file_count = len(files)
         total_size_str = _format_file_size(total_size)
@@ -408,8 +421,8 @@ async def send_expiry_notification_email(
     try:
         msg = MIMEMultipart("alternative")
         msg["From"] = f"Selfizee Transfer <{settings.SMTP_FROM}>"
-        msg["Reply-To"] = "noreply@konitys.fr"
         msg["To"] = recipient_email
+        _set_deliverability_headers(msg)
 
         if is_sender:
             msg["Subject"] = "Votre transfert Selfizee expire bientôt sans téléchargement"
