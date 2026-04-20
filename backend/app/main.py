@@ -50,9 +50,15 @@ async def startup_event() -> None:
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        # Lightweight additive migrations for columns added after initial deploy
-        await conn.execute(text("ALTER TABLE transfers ADD COLUMN IF NOT EXISTS cc_emails TEXT"))
-        await conn.execute(text("ALTER TABLE transfers ALTER COLUMN recipient_email TYPE TEXT"))
+    # Additive migration run separately with a short timeout so concurrent
+    # uvicorn workers don't deadlock each other on a shared ALTER TABLE lock.
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SET lock_timeout = '2s'"))
+            await conn.execute(text("ALTER TABLE transfers ADD COLUMN IF NOT EXISTS cc_emails TEXT"))
+            await conn.commit()
+    except Exception as exc:  # another worker won the race, or column exists
+        logger.warning("cc_emails migration skipped: %s", exc)
     logger.info("Database tables created/verified")
 
     # Ensure storage directory exists
