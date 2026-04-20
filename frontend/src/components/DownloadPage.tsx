@@ -69,16 +69,19 @@ export default function DownloadPageComponent({ downloadInfo, token }: DownloadP
 
       <main className="flex-1 flex items-start justify-center p-4 pt-8 sm:pt-16">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm max-w-lg w-full overflow-hidden">
-          <div className="bg-brand-gradient p-6 text-white">
-            <h1 className="text-xl font-semibold mb-1">
+          <div className="px-6 pt-6 pb-5 border-l-4 border-primary">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+              Nouveau transfert
+            </p>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-1">
               Vous avez reçu des fichiers
             </h1>
-            <p className="text-sm text-white/80">
-              De la part de <strong>{downloadInfo.sender_name || downloadInfo.sender_email}</strong> (Selfizee)
+            <p className="text-sm text-gray-500">
+              De la part de <strong className="text-gray-900">{downloadInfo.sender_name || downloadInfo.sender_email}</strong> <span className="text-primary font-medium">(Selfizee)</span>
             </p>
           </div>
 
-          <div className="p-6">
+          <div className="px-6 pb-6">
             {downloadInfo.message && (
               <div className="bg-gray-50 rounded-lg p-4 mb-5">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
