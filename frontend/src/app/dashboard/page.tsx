@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { useTransfers } from '@/hooks/useTransfers';
 import TransferList from '@/components/TransferList';
 
@@ -20,6 +22,13 @@ export default function DashboardPage() {
             Gérez vos fichiers envoyés
           </p>
         </div>
+        <Link
+          href="/upload"
+          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#0693e3] to-[#9b51e0] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+        >
+          <PlusIcon className="h-5 w-5" />
+          Nouveau transfert
+        </Link>
       </div>
 
       {error && (
