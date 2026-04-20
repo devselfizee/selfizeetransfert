@@ -13,8 +13,8 @@ import ReactDOM from 'react-dom';
 const DEFAULT_REMOTE_URL =
   process.env.NEXT_PUBLIC_PLATFORM_URL || 'https://plateform.konitys.fr';
 const REMOTE_ENTRY_PATH = '/assets/remoteEntry.js';
-const LOAD_TIMEOUT_MS = 5000;
-const MAX_RETRIES = 1;
+const LOAD_TIMEOUT_MS = 2000;
+const MAX_RETRIES = 0;
 const RECONNECT_INTERVAL_MS = 30000;
 
 interface FederationContainer {
