@@ -31,11 +31,13 @@ export default function UploadPage() {
 
   const handleSubmit = async (data: {
     recipient_email: string;
+    cc_emails: string;
     message: string;
     expiration: string;
   }) => {
     const transfer = await uploadFiles(files, {
       recipient_email: data.recipient_email,
+      cc_emails: data.cc_emails || undefined,
       message: data.message || undefined,
       expiration: data.expiration,
     });

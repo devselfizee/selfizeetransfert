@@ -6,6 +6,7 @@ import Button from './Button';
 
 interface TransferFormData {
   recipient_email: string;
+  cc_emails: string;
   message: string;
   expiration: string;
 }
@@ -16,6 +17,26 @@ interface TransferFormProps {
   hasFiles: boolean;
 }
 
+const EMAIL_RE = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+function validateEmailList(required: boolean) {
+  return (raw: string) => {
+    const parts = raw
+      .split(/[,;]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length === 0) {
+      return required ? "Au moins une adresse est requise" : true;
+    }
+    for (const p of parts) {
+      if (!EMAIL_RE.test(p)) {
+        return `Adresse invalide : ${p}`;
+      }
+    }
+    return true;
+  };
+}
+
 export default function TransferForm({ onSubmit, isSubmitting, hasFiles }: TransferFormProps) {
   const {
     register,
@@ -24,6 +45,7 @@ export default function TransferForm({ onSubmit, isSubmitting, hasFiles }: Trans
   } = useForm<TransferFormData>({
     defaultValues: {
       recipient_email: '',
+      cc_emails: '',
       message: '',
       expiration: '7d',
     },
@@ -33,16 +55,26 @@ export default function TransferForm({ onSubmit, isSubmitting, hasFiles }: Trans
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <Input
         id="recipient_email"
-        label="E-mail du destinataire"
-        type="email"
-        placeholder="destinataire@exemple.com"
+        label="Destinataire(s)"
+        type="text"
+        placeholder="a@exemple.com, b@exemple.com"
+        helpText="Séparez plusieurs adresses par une virgule."
         error={errors.recipient_email?.message}
         {...register('recipient_email', {
           required: "L'e-mail du destinataire est requis",
-          pattern: {
-            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: 'Adresse e-mail invalide',
-          },
+          validate: validateEmailList(true),
+        })}
+      />
+
+      <Input
+        id="cc_emails"
+        label="Copie à (optionnel)"
+        type="text"
+        placeholder="c@exemple.com, d@exemple.com"
+        helpText="Séparez plusieurs adresses par une virgule."
+        error={errors.cc_emails?.message}
+        {...register('cc_emails', {
+          validate: validateEmailList(false),
         })}
       />
 

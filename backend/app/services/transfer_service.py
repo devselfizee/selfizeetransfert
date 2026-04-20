@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 async def create_transfer(
     db: AsyncSession,
     user: User,
-    recipient_email: str,
+    recipients: List[str],
+    cc_list: List[str],
     message: Optional[str],
     expiry_hours: int,
     files: List[UploadFile],
@@ -82,7 +83,8 @@ async def create_transfer(
             id=uuid.uuid4(),
             token=token,
             user_id=user.id,
-            recipient_email=recipient_email,
+            recipient_email=", ".join(recipients),
+            cc_emails=", ".join(cc_list) if cc_list else None,
             message=message,
             expires_at=datetime.now(timezone.utc) + timedelta(hours=expiry_hours),
             total_size=total_size,
@@ -107,23 +109,25 @@ async def create_transfer(
         # Refresh to load relationships
         await db.refresh(transfer)
 
-        # Send notification email in background (fire-and-forget, never blocks the response)
+        # Send notification email to each recipient + each CC (fire-and-forget)
         download_url = f"{settings.BASE_URL}/download/{token}"
-        asyncio.create_task(
-            send_transfer_email(
-                recipient_email=recipient_email,
-                sender_name=user.full_name,
-                message=message,
-                download_url=download_url,
-                expires_at=transfer.expires_at,
+        for email in recipients + cc_list:
+            asyncio.create_task(
+                send_transfer_email(
+                    recipient_email=email,
+                    sender_name=user.full_name,
+                    message=message,
+                    download_url=download_url,
+                    expires_at=transfer.expires_at,
+                )
             )
-        )
 
         logger.info(
-            "Transfer %s created by user %s for %s (%d files, %d bytes)",
+            "Transfer %s created by user %s for %d recipients + %d cc (%d files, %d bytes)",
             transfer.id,
             user.id,
-            recipient_email,
+            len(recipients),
+            len(cc_list),
             len(saved_files),
             total_size,
         )

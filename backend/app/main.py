@@ -3,6 +3,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.api.auth import router as auth_router
 from app.api.downloads import router as downloads_router
@@ -49,6 +50,9 @@ async def startup_event() -> None:
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Lightweight additive migrations for columns added after initial deploy
+        await conn.execute(text("ALTER TABLE transfers ADD COLUMN IF NOT EXISTS cc_emails TEXT"))
+        await conn.execute(text("ALTER TABLE transfers ALTER COLUMN recipient_email TYPE TEXT"))
     logger.info("Database tables created/verified")
 
     # Ensure storage directory exists

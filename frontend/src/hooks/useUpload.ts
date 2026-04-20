@@ -27,7 +27,7 @@ export function useUpload() {
   const uploadFiles = useCallback(
     async (
       files: File[],
-      metadata: { recipient_email: string; message?: string; expiration: string }
+      metadata: { recipient_email: string; cc_emails?: string; message?: string; expiration: string }
     ): Promise<Transfer | null> => {
       setIsUploading(true);
       setError(null);
@@ -40,6 +40,7 @@ export function useUpload() {
       const formData = new FormData();
       formData.append('metadata', JSON.stringify({
         recipient_email: metadata.recipient_email,
+        cc_emails: metadata.cc_emails || undefined,
         message: metadata.message || undefined,
         expiry_hours: expirationMap[metadata.expiration] || 72,
       }));

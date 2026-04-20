@@ -16,6 +16,7 @@ from app.services.transfer_service import (
     get_transfer_by_id,
     get_user_transfers,
 )
+from app.utils.validators import parse_email_list
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +57,19 @@ async def create_new_transfer(
             detail="Invalid metadata JSON",
         )
 
-    recipient_email = meta.get("recipient_email")
-    if not recipient_email:
+    try:
+        recipients = parse_email_list(meta.get("recipient_email"))
+        cc_list = parse_email_list(meta.get("cc_emails"))
+    except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="recipient_email is required in metadata",
+            detail=str(exc),
+        )
+
+    if not recipients:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one recipient is required",
         )
 
     message: Optional[str] = meta.get("message")
@@ -82,7 +91,8 @@ async def create_new_transfer(
         transfer = await create_transfer(
             db=db,
             user=current_user,
-            recipient_email=recipient_email,
+            recipients=recipients,
+            cc_list=cc_list,
             message=message,
             expiry_hours=expiry_hours,
             files=files,

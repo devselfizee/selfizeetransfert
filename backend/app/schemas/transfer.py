@@ -17,6 +17,7 @@ class TransferResponse(BaseModel):
     id: uuid.UUID
     token: str
     recipient_email: str
+    cc_emails: Optional[str] = None
     sender_name: str = ""
     sender_email: str = ""
     message: Optional[str] = None
