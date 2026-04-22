@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface SidebarItem {
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   path: string;
   badge?: number | string;
@@ -30,6 +30,17 @@ export default function FallbackSidebar({
   onCollapse,
 }: FallbackSidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
+
+  // Auto-collapse on narrow screens; stays in sync with resize
+  useEffect(() => {
+    if (controlledCollapsed !== undefined) return;
+    const mq = window.matchMedia('(max-width: 767px)');
+    const apply = () => setInternalCollapsed(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, [controlledCollapsed]);
+
   const collapsed =
     controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
 
@@ -39,7 +50,7 @@ export default function FallbackSidebar({
     else setInternalCollapsed(next);
   };
 
-  const width = collapsed ? 52 : 210;
+  const width = collapsed ? 56 : 210;
 
   return (
     <>
@@ -101,6 +112,7 @@ export default function FallbackSidebar({
               </div>
               {(section.items || []).map((item, ii) => {
                 const isActive = activePath === item.path;
+                const Icon = item.icon;
                 return (
                   <button
                     key={ii}
@@ -116,7 +128,7 @@ export default function FallbackSidebar({
                         : 'transparent',
                       border: 'none',
                       borderLeft: isActive
-                        ? '3px solid #4F46E5'
+                        ? '3px solid #fe0154'
                         : '3px solid transparent',
                       color: isActive ? '#F1F5F9' : '#94A3B8',
                       fontSize: 13,
@@ -125,6 +137,9 @@ export default function FallbackSidebar({
                       textAlign: 'left',
                     }}
                   >
+                    {Icon && (
+                      <Icon style={{ width: 18, height: 18, flexShrink: 0 }} />
+                    )}
                     {item.label}
                   </button>
                 );
@@ -137,6 +152,7 @@ export default function FallbackSidebar({
             .flatMap((s) => s.items || [])
             .map((item, i) => {
               const isActive = activePath === item.path;
+              const Icon = item.icon;
               return (
                 <button
                   key={i}
@@ -147,20 +163,23 @@ export default function FallbackSidebar({
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: '100%',
-                    height: 40,
+                    height: 44,
                     background: isActive
-                      ? 'rgba(255,255,255,0.08)'
+                      ? 'rgba(254,1,84,0.15)'
                       : 'transparent',
                     border: 'none',
                     borderLeft: isActive
-                      ? '3px solid #4F46E5'
+                      ? '3px solid #fe0154'
                       : '3px solid transparent',
-                    color: isActive ? '#F1F5F9' : '#94A3B8',
-                    fontSize: 16,
+                    color: isActive ? '#ffffff' : '#94A3B8',
                     cursor: 'pointer',
                   }}
                 >
-                  &bull;
+                  {Icon ? (
+                    <Icon style={{ width: 20, height: 20 }} />
+                  ) : (
+                    <span style={{ fontSize: 16 }}>&bull;</span>
+                  )}
                 </button>
               );
             })}

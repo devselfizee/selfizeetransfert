@@ -3,6 +3,10 @@
 import React, { useState, useEffect, useCallback, lazy } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  Squares2X2Icon,
+  CloudArrowUpIcon,
+} from '@heroicons/react/24/outline';
+import {
   loadRemoteComponent,
   setReconnectCallback,
   FederatedWrapper,
@@ -25,8 +29,8 @@ const SIDEBAR_SECTIONS = [
   {
     label: 'TRANSFERTS',
     items: [
-      { label: 'Tableau de bord', path: '/dashboard' },
-      { label: 'Nouveau transfert', path: '/upload' },
+      { label: 'Tableau de bord', path: '/dashboard', icon: Squares2X2Icon },
+      { label: 'Nouveau transfert', path: '/upload', icon: CloudArrowUpIcon },
     ],
   },
 ];

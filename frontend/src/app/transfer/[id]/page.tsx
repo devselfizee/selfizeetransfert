@@ -81,17 +81,18 @@ export default function TransferDetailPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Lien de téléchargement
                   </label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <input
                       type="text"
                       readOnly
                       value={getDownloadUrl(transfer.token)}
-                      className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 select-all"
+                      className="flex-1 min-w-0 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 select-all"
                     />
                     <Button
                       variant={copied ? 'secondary' : 'primary'}
                       size="md"
                       onClick={handleCopy}
+                      className="w-full sm:w-auto justify-center"
                     >
                       {copied ? (
                         <>
